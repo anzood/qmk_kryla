@@ -5,6 +5,7 @@
 // Lintilla's fn keys above the pinky columns moved to the "tucky" thumb keys.
 
 #include QMK_KEYBOARD_H
+#include "ws2812.h"
 
 enum layers { DEF, SYM, NAV, NUM, FN, ADJ };
 
@@ -164,6 +165,72 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return false;
             }
     }
+    return true;
+}
+
+// Status LED (on-board WS2812). Highest priority first:
+//   bootloader: white; app switcher: blinks green; sticky mod pending:
+//   blinks the layer color (white on DEFAULT); layer: steady color;
+//   DEFAULT: off. Goes dark together with the OLED when idle.
+#define STATUS_LED_BRIGHTNESS 48 // of 255: the WS2812 is very bright
+#define STATUS_LED_BLINK_MS 250
+#define STATUS_LED_TIMEOUT OLED_TIMEOUT
+
+typedef struct {
+    uint8_t r, g, b;
+} color_t;
+
+static const color_t BLACK = {0, 0, 0};
+static const color_t WHITE = {255, 255, 255};
+
+static const color_t layer_colors[] = {
+    [DEF] = {0, 0, 0},       // off
+    [SYM] = {255, 180, 0},   // yellow
+    [NAV] = {0, 60, 255},    // blue
+    [NUM] = {0, 255, 40},    // green
+    [FN]  = {170, 0, 255},   // purple
+    [ADJ] = {255, 0, 0},     // red
+};
+
+static color_t status_led_shown = {1, 1, 1}; // forces the first update
+
+static void status_led_set(color_t c) {
+    if (c.r == status_led_shown.r && c.g == status_led_shown.g && c.b == status_led_shown.b) {
+        return;
+    }
+    status_led_shown = c;
+    ws2812_set_color_all(c.r * STATUS_LED_BRIGHTNESS / 255, c.g * STATUS_LED_BRIGHTNESS / 255, c.b * STATUS_LED_BRIGHTNESS / 255);
+    ws2812_flush();
+}
+
+static color_t status_led_color(void) {
+    bool    blink_on = (timer_read() / STATUS_LED_BLINK_MS) % 2 == 0;
+    uint8_t layer    = get_highest_layer(layer_state);
+
+    if (switcher_mod) {
+        return blink_on ? layer_colors[NUM] : BLACK;
+    }
+    if (get_oneshot_mods()) {
+        return blink_on ? (layer == DEF ? WHITE : layer_colors[layer]) : BLACK;
+    }
+    if (last_input_activity_elapsed() > STATUS_LED_TIMEOUT) {
+        return BLACK;
+    }
+    return layer_colors[layer];
+}
+
+void keyboard_post_init_user(void) {
+    ws2812_init();
+    status_led_set(BLACK);
+}
+
+void housekeeping_task_user(void) {
+    status_led_set(status_led_color());
+}
+
+// Runs right before QK_BOOT jumps to the bootloader
+bool shutdown_user(bool jump_to_bootloader) {
+    status_led_set(jump_to_bootloader ? WHITE : BLACK);
     return true;
 }
 

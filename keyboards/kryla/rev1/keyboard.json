@@ -21,6 +21,13 @@
         "nkro": true,
         "oled": true
     },
+    "ws2812": {
+        "driver": "vendor",
+        "pin": "GP23"
+    },
+    "indicators": {
+        "caps_lock": "GP25"
+    },
     "bootmagic": {
         "matrix": [1, 0]
     },

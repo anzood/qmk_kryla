@@ -14,6 +14,23 @@ Make example (after copying `keyboards/kryla` into `qmk_firmware`):
 qmk compile -kb kryla/rev1 -km default
 ```
 
+## Status LEDs
+
+The on-board WS2812 (GP23) shows the keyboard state, highest priority
+first:
+
+| State | LED |
+| --- | --- |
+| Entering the bootloader with `QK_BOOT` | white |
+| App or window switcher holds Cmd/Opt | blinks green |
+| Sticky modifier is pending | blinks the layer color, white on DEFAULT |
+| Layer other than DEFAULT | steady layer color |
+| DEFAULT layer, or idle for a minute | off |
+
+Layer colors: SYMBOLS yellow, NAV blue, NUMBERS green, FN KEYS purple,
+ADJUST red. The blue LED (GP25) shows Caps Lock and blinks while the
+double press of RST waits.
+
 ## Bootloader
 
 - Double press RST on the YD-RP2040 (or hold BOOT while plugging in).
