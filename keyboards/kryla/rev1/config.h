@@ -11,9 +11,10 @@
 // On-board WS2812 (GP23), driven directly by the keymap without RGBLIGHT
 #define WS2812_LED_COUNT 1
 
-// OLED 0.96" 128x64 SSD1306 on I2C1 (see Kryla docs/rev1-wiring.md)
-#define I2C_DRIVER I2CD1
-#define I2C1_SDA_PIN GP2
-#define I2C1_SCL_PIN GP3
+// OLED 0.96" 128x64 SSD1306 on I2C0 (see Kryla docs/rev1-wiring.md).
+// QMK keeps the I2C1_* pin names whichever peripheral is used.
+#define I2C_DRIVER I2CD0
+#define I2C1_SDA_PIN GP0
+#define I2C1_SCL_PIN GP1
 #define OLED_DISPLAY_128X64
 #define OLED_DISPLAY_ADDRESS 0x3C

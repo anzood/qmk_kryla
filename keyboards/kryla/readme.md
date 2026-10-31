@@ -31,6 +31,9 @@ Layer colors: SYMBOLS yellow, NAV blue, NUMBERS green, FN KEYS purple,
 ADJUST red. The blue LED (GP25) shows Caps Lock and blinks while the
 double press of RST waits.
 
+The WS2812 is not connected at the factory: solder the "RGB" jumper (R68)
+next to it.
+
 ## Bootloader
 
 - Double press RST on the YD-RP2040 (or hold BOOT while plugging in).
